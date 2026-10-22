@@ -19,12 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
       - name: Clean image backgrounds
         shell: bash
         run: |
-          if command -v magick >/dev/null 2>&1; then IMG=magick; else IMG=convert; fi
           for f in blue coral cream matcha pink yellow; do
-            $IMG "$f.webp" -fuzz 5% -fill white \
+            convert "$f.webp" -fuzz 5% -fill white \
               -draw "color 0,0 floodfill" \
               -draw "color 807,0 floodfill" \
               -draw "color 0,336 floodfill" \
