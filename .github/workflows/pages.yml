@@ -25,12 +25,7 @@ jobs:
         shell: bash
         run: |
           for f in blue coral cream matcha pink yellow; do
-            convert "$f.webp" -fuzz 5% -fill white \
-              -draw "color 0,0 floodfill" \
-              -draw "color 807,0 floodfill" \
-              -draw "color 0,336 floodfill" \
-              -draw "color 807,336 floodfill" \
-              "$f-clean.webp"
+            convert "$f.webp" -alpha off -fuzz 7% -fill white -opaque black "$f-clean.webp"
             mv "$f-clean.webp" "$f.webp"
           done
       - uses: actions/upload-pages-artifact@v3
