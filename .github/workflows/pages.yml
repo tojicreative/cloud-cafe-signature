@@ -19,15 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Install ImageMagick
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
-      - name: Clean image backgrounds
-        shell: bash
-        run: |
-          for f in blue coral cream matcha pink yellow; do
-            convert "$f.webp" -alpha off -fuzz 7% -fill white -opaque black "$f-clean.webp"
-            mv "$f-clean.webp" "$f.webp"
-          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
