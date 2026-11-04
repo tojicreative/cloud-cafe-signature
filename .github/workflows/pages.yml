@@ -19,6 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+      - name: Create white-background PNG assets
+        shell: bash
+        run: |
+          for f in blue coral cream matcha pink yellow; do
+            convert "$f.webp" -background white -alpha remove -alpha off "$f.png"
+          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
