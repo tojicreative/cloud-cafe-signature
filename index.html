@@ -26,7 +26,9 @@ textarea{height:78px;resize:vertical}
 .actions .secondary{background:#85532f}
 .status{margin-top:10px;font-size:12px;color:#695f58;line-height:1.4}
 .preview-shell{overflow:auto;padding:16px;background:#ebe7e2;border-radius:9px}
-#previewCanvas{display:block;max-width:100%;height:auto}
+.stage{position:relative;width:808px;height:337px;background:#fff;overflow:hidden}
+#previewBg{position:absolute;inset:0;width:808px;height:337px;display:block;object-fit:fill}
+#overlayCanvas{position:absolute;inset:0;width:808px;height:337px;display:block}
 .functional{margin-top:16px;padding-top:14px;border-top:1px solid #ddd4cd;font-size:12px;line-height:1.6}
 .functional a{color:#8a572f;text-decoration:underline}
 .disclaimer-preview{margin-top:14px;max-width:760px;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic}
@@ -37,7 +39,7 @@ textarea{height:78px;resize:vertical}
 <body>
 <div class="page">
 <h1>Clöud Café Gmail Signature Generator</h1>
-<p class="intro">No hosting required. Customize the design, download the PNG, then upload that image directly inside Gmail.</p>
+<p class="intro">Customize the design, then download the finished signature PNG.</p>
 <div class="grid">
 <div class="panel">
 <label>Name</label><input id="name" value="GIO CHUNG">
@@ -67,13 +69,16 @@ textarea{height:78px;resize:vertical}
 <button id="copyLinksBtn" class="secondary">Copy Links + Disclaimer</button>
 </div>
 <div class="status" id="status"></div>
-<div class="small-note">
-Gmail setup: upload the downloaded PNG with Gmail’s image button, then paste the copied link/disclaimer block underneath. This avoids Gmail stripping embedded image data.
-</div>
+<div class="small-note">The preview uses the full paper artwork directly, so the selected blue/coral/cream/matcha/pink/yellow design stays visible.</div>
 </div>
 
 <div class="panel">
-<div class="preview-shell"><canvas id="previewCanvas" width="808" height="337"></canvas></div>
+<div class="preview-shell">
+<div class="stage">
+<img id="previewBg" src="blue.webp" alt="Clöud Café signature background">
+<canvas id="overlayCanvas" width="808" height="337"></canvas>
+</div>
+</div>
 
 <div class="functional">
 <a href="tel:+17473723110">(747) 372-3110</a> &nbsp;•&nbsp;
@@ -89,39 +94,35 @@ This message, including attachments, is the property of TOJI Co and is intended 
 </div>
 
 <script>
-const BG = {
- blue:"blue.webp", coral:"coral.webp", cream:"cream.webp",
- matcha:"matcha.webp", pink:"pink.webp", yellow:"yellow.webp"
+const BG={
+ blue:"blue.webp",coral:"coral.webp",cream:"cream.webp",
+ matcha:"matcha.webp",pink:"pink.webp",yellow:"yellow.webp"
 };
 const brown="#8a572f";
 let selected="matcha";
 let color="blue";
 const q=id=>document.getElementById(id);
-const canvas=q("previewCanvas"), ctx=canvas.getContext("2d");
-const bg=new Image(), circle=new Image();
+const overlay=q("overlayCanvas");
+const ctx=overlay.getContext("2d");
+const previewBg=q("previewBg");
+const circle=new Image();
 circle.src="circle.png";
 
-function imageReady(img){return new Promise((res,rej)=>{if(img.complete&&img.naturalWidth) return res(); img.onload=res; img.onerror=rej;});}
-function spacedText(ctx,text,x,y,spacing){
- let xx=x; for(const ch of text){ctx.fillText(ch,xx,y); xx+=ctx.measureText(ch).width+spacing;}
+function spacedText(c,text,x,y,spacing){
+ let xx=x;
+ for(const ch of text){c.fillText(ch,xx,y);xx+=c.measureText(ch).width+spacing;}
 }
-function wrapText(ctx,text,x,y,maxWidth,lineH){
- const words=text.split(/\s+/); let line="";
+function wrapText(c,text,x,y,maxWidth,lineH){
+ const words=text.split(/\s+/);let line="";
  for(const w of words){
-   const test=line?line+" "+w:w;
-   if(ctx.measureText(test).width>maxWidth && line){ctx.fillText(line,x,y); line=w; y+=lineH;}
-   else line=test;
+  const test=line?line+" "+w:w;
+  if(c.measureText(test).width>maxWidth&&line){c.fillText(line,x,y);line=w;y+=lineH;}
+  else line=test;
  }
- if(line) ctx.fillText(line,x,y);
+ if(line)c.fillText(line,x,y);
 }
-async function render(){
- bg.src=BG[color];
- await Promise.all([imageReady(bg),imageReady(circle), document.fonts?.ready||Promise.resolve()]);
+function drawOverlay(){
  ctx.clearRect(0,0,808,337);
- ctx.fillStyle="#ffffff";
- ctx.fillRect(0,0,808,337);
- ctx.drawImage(bg,0,0,808,337);
-
  ctx.textBaseline="top";
  ctx.fillStyle="#0d0d0d";
  ctx.font='700 34px "JetBrains Mono","Courier New",monospace';
@@ -138,8 +139,10 @@ async function render(){
  ctx.font='400 15px "JetBrains Mono","Courier New",monospace';
  wrapText(ctx,q("favorite").value,49,222,460,18.3);
 
- const circleLeft=selected==="coffee"?85:selected==="tea"?228:374;
- ctx.drawImage(circle,circleLeft,165,96,43);
+ if(circle.complete&&circle.naturalWidth){
+  const circleLeft=selected==="coffee"?85:selected==="tea"?228:374;
+  ctx.drawImage(circle,circleLeft,165,96,43);
+ }
 
  ctx.fillStyle=brown;
  ctx.font='400 15.5px "JetBrains Mono","Courier New",monospace';
@@ -148,45 +151,62 @@ async function render(){
  ctx.fillText("@cloudcafe_official",596,237);
  ctx.fillText("@sipcloudcafe",596,268);
 }
-["name","job","email","favorite"].forEach(id=>q(id).addEventListener("input",render));
+function update(){
+ previewBg.src=BG[color];
+ if(document.fonts&&document.fonts.ready){document.fonts.ready.then(drawOverlay);}
+ else{drawOverlay();}
+}
+circle.onload=drawOverlay;
+["name","job","email","favorite"].forEach(id=>q(id).addEventListener("input",drawOverlay));
 document.querySelectorAll("[data-cat]").forEach(btn=>btn.addEventListener("click",()=>{
  selected=btn.dataset.cat;
  document.querySelectorAll("[data-cat]").forEach(b=>b.classList.remove("active"));
- btn.classList.add("active"); render();
+ btn.classList.add("active");
+ drawOverlay();
 }));
 document.querySelectorAll("[data-color]").forEach(btn=>btn.addEventListener("click",()=>{
  color=btn.dataset.color;
  document.querySelectorAll("[data-color]").forEach(b=>b.classList.remove("active"));
- btn.classList.add("active"); render();
+ btn.classList.add("active");
+ update();
 }));
 
 q("downloadBtn").addEventListener("click",async()=>{
- await render();
+ const out=document.createElement("canvas");
+ out.width=808;out.height=337;
+ const oc=out.getContext("2d");
+ oc.fillStyle="#fff";oc.fillRect(0,0,808,337);
+ const bg=new Image();
+ bg.src=BG[color];
+ await new Promise((res,rej)=>{bg.onload=res;bg.onerror=rej;});
+ oc.drawImage(bg,0,0,808,337);
+ oc.drawImage(overlay,0,0);
  const a=document.createElement("a");
- a.href=canvas.toDataURL("image/png");
+ a.href=out.toDataURL("image/png");
  a.download=(q("name").value||"cloud-cafe").toLowerCase().replace(/[^a-z0-9]+/g,"-")+"-signature.png";
  a.click();
- q("status").textContent="PNG downloaded. Upload it directly in Gmail’s signature editor.";
+ q("status").textContent="PNG downloaded.";
 });
 
 q("copyLinksBtn").addEventListener("click",async()=>{
- const disclaimer=`This message, including attachments, is the property of TOJI Co and is intended solely for the individuals or entities to which it is addressed. This message may contain information that is proprietary, confidential, and attorney-client privileged. If you are not the intended recipient, please immediately notify the sender and delete this message and attachments from any computer, phone, system, or cloud storage. Any viewing, copying, publishing, disclosure, distribution of this information, or the taking of any action in reliance on its contents of this message by unintended recipients is strictly prohibited. ♡ Please consider the environment before printing this email.`;
- const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;color:${brown};">
- <a href="tel:+17473723110" style="color:${brown};text-decoration:underline">(747) 372-3110</a> &nbsp;•&nbsp;
- <a href="https://cloudcafe.co" style="color:${brown};text-decoration:underline">cloudcafe.co</a> &nbsp;•&nbsp;
- <a href="https://www.instagram.com/cloudcafe_official" style="color:${brown};text-decoration:underline">@cloudcafe_official</a> &nbsp;•&nbsp;
- <a href="https://www.tiktok.com/@sipcloudcafe" style="color:${brown};text-decoration:underline">@sipcloudcafe</a>
- </div>
- <div style="margin-top:14px;max-width:760px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic">${disclaimer}</div>`;
+ const disclaimer=document.querySelector(".disclaimer-preview").textContent.trim();
+ const html='<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;color:'+brown+'">'+
+ '<a href="tel:+17473723110" style="color:'+brown+'">(747) 372-3110</a> &nbsp;•&nbsp; '+
+ '<a href="https://cloudcafe.co" style="color:'+brown+'">cloudcafe.co</a> &nbsp;•&nbsp; '+
+ '<a href="https://www.instagram.com/cloudcafe_official" style="color:'+brown+'">@cloudcafe_official</a> &nbsp;•&nbsp; '+
+ '<a href="https://www.tiktok.com/@sipcloudcafe" style="color:'+brown+'">@sipcloudcafe</a></div>'+
+ '<div style="margin-top:14px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic">'+disclaimer+'</div>';
  try{
-   await navigator.clipboard.write([new ClipboardItem({
-    "text/html":new Blob([html],{type:"text/html"}),
-    "text/plain":new Blob([`(747) 372-3110 • cloudcafe.co • @cloudcafe_official • @sipcloudcafe\n\n${disclaimer}`],{type:"text/plain"})
-   })]);
-   q("status").textContent="Links + disclaimer copied. Paste them underneath the uploaded PNG in Gmail.";
- }catch(e){q("status").textContent="Clipboard blocked. Open in Chrome and allow clipboard access.";}
+  await navigator.clipboard.write([new ClipboardItem({
+   "text/html":new Blob([html],{type:"text/html"}),
+   "text/plain":new Blob(["(747) 372-3110 • cloudcafe.co • @cloudcafe_official • @sipcloudcafe\n\n"+disclaimer],{type:"text/plain"})
+  })]);
+  q("status").textContent="Links + disclaimer copied.";
+ }catch(e){
+  q("status").textContent="Clipboard blocked. Use Chrome and allow clipboard access.";
+ }
 });
-render();
+update();
 </script>
 </body>
 </html>
