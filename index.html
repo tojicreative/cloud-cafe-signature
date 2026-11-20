@@ -1,9 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clöud Café Email Signature Generator</title>
+<title>Clöud Café Gmail Signature Generator</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 *{box-sizing:border-box}
@@ -21,42 +21,37 @@ textarea{height:78px;resize:vertical}
 .choices button.active,.colors button.active{border:2px solid #17120f}
 .c-blue{background:#cfeaf5!important}.c-coral{background:#f3c7b8!important}.c-cream{background:#f4efe7!important}
 .c-matcha{background:#d9efc8!important}.c-pink{background:#f3c9dd!important}.c-yellow{background:#f6dfad!important}
-.actions{margin-top:18px}
-.actions button{width:100%;border:0;border-radius:8px;padding:13px;background:#211a16;color:#fff;font-weight:700;cursor:pointer}
-.status{margin-top:10px;font-size:12px;color:#695f58;line-height:1.45}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.actions button{border:0;border-radius:7px;padding:11px 13px;background:#211a16;color:#fff;font-weight:700;cursor:pointer}
+.actions .secondary{background:#85532f}
+.status{margin-top:10px;font-size:12px;color:#695f58;line-height:1.4}
 .preview-shell{overflow:auto;padding:16px;background:#ebe7e2;border-radius:9px}
-.stage{position:relative;width:808px;height:337px;overflow:hidden;background:#fff}
-.stage>img.bg{position:absolute;inset:0;width:808px;height:337px;display:block}
-.overlay{position:absolute;z-index:2;font-family:'JetBrains Mono','Courier New',monospace;color:#0d0d0d;line-height:1.05}
-.name{left:49px;top:53px;font-size:34px;font-weight:700;letter-spacing:-1.2px}
-.job{left:49px;top:119px;font-size:23px;font-weight:700}
-.email{left:298px;top:121px;font-size:15px;text-decoration:underline;color:#0d0d0d}
-.fav{left:49px;top:222px;width:460px;font-size:15px;line-height:1.22}
-.circle{position:absolute;z-index:3;top:165px;width:96px;height:43px}
-.circle.coffee{left:85px}.circle.tea{left:228px}.circle.matcha{left:374px}
-.contact{position:absolute;z-index:4;left:596px;font-family:'JetBrains Mono','Courier New',monospace;font-size:15.5px;text-decoration:none;color:#8a572f}
-.phone{top:174px}.web{top:206px}.ig{top:237px}.tt{top:268px}
-.disclaimer{margin-top:14px;max-width:760px;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic}
+#previewCanvas{display:block;max-width:100%;height:auto}
+.functional{margin-top:16px;padding-top:14px;border-top:1px solid #ddd4cd;font-size:12px;line-height:1.6}
+.functional a{color:#8a572f;text-decoration:underline}
+.disclaimer-preview{margin-top:14px;max-width:760px;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic}
 .small-note{margin-top:13px;font-size:12px;line-height:1.55;color:#6c625c}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="page">
-<h1>Clöud Café Email Signature Generator</h1>
-<p class="intro">Customize your signature, then click <b>Copy Signature</b> and paste it directly into Gmail.</p>
+<h1>Clöud Café Gmail Signature Generator</h1>
+<p class="intro">No hosting required. Customize the design, download the PNG, then upload that image directly inside Gmail.</p>
 <div class="grid">
 <div class="panel">
 <label>Name</label><input id="name" value="GIO CHUNG">
 <label>Job Title</label><input id="job" value="GRAPHIC DESIGNER">
 <label>Email</label><input id="email" value="gio.chung@cloudcafe.co">
 <label>Favorite Drink / Hack</label><textarea id="favorite">Gio’s favorite drink is Matcha Latte with cold foam on top :)</textarea>
+
 <label>Favorite Category</label>
 <div class="choices">
 <button data-cat="coffee">COFFEE</button>
 <button data-cat="tea">TEA</button>
 <button data-cat="matcha" class="active">MATCHA</button>
 </div>
+
 <label>Paper Color</label>
 <div class="colors">
 <button data-color="blue" class="c-blue active">BLUE</button>
@@ -66,84 +61,130 @@ textarea{height:78px;resize:vertical}
 <button data-color="pink" class="c-pink">PINK</button>
 <button data-color="yellow" class="c-yellow">YELLOW</button>
 </div>
-<div class="actions"><button id="copy">Copy Signature</button></div>
+
+<div class="actions">
+<button id="downloadBtn">Download Signature PNG</button>
+<button id="copyLinksBtn" class="secondary">Copy Links + Disclaimer</button>
+</div>
 <div class="status" id="status"></div>
-<div class="small-note">Paste into Gmail → Settings → See all settings → General → Signature. Phone, website, Instagram, and TikTok are separate clickable links.</div>
+<div class="small-note">
+Gmail setup: upload the downloaded PNG with Gmail’s image button, then paste the copied link/disclaimer block underneath. This avoids Gmail stripping embedded image data.
 </div>
+</div>
+
 <div class="panel">
-<div class="preview-shell">
-<div class="stage" id="sig">
-<img class="bg" id="bg" src="blue.png" alt="">
-<div class="overlay name" id="n">GIO CHUNG</div>
-<div class="overlay job" id="j">GRAPHIC DESIGNER</div>
-<a class="overlay email" id="e" href="mailto:gio.chung@cloudcafe.co">gio.chung@cloudcafe.co</a>
-<div class="overlay fav" id="f">Gio’s favorite drink is Matcha Latte with cold foam on top :)</div>
-<img id="circle" class="circle matcha" src="circle.png" alt="">
-<a class="contact phone" href="tel:+17473723110">(747) 372-3110</a>
-<a class="contact web" href="https://cloudcafe.co">cloudcafe.co</a>
-<a class="contact ig" href="https://www.instagram.com/cloudcafe_official">@cloudcafe_official</a>
-<a class="contact tt" href="https://www.tiktok.com/@sipcloudcafe">@sipcloudcafe</a>
+<div class="preview-shell"><canvas id="previewCanvas" width="808" height="337"></canvas></div>
+
+<div class="functional">
+<a href="tel:+17473723110">(747) 372-3110</a> &nbsp;•&nbsp;
+<a href="https://cloudcafe.co">cloudcafe.co</a> &nbsp;•&nbsp;
+<a href="https://www.instagram.com/cloudcafe_official">@cloudcafe_official</a> &nbsp;•&nbsp;
+<a href="https://www.tiktok.com/@sipcloudcafe">@sipcloudcafe</a>
 </div>
-</div>
-<div class="disclaimer">This message, including attachments, is the property of TOJI Co and is intended solely for the individuals or entities to which it is addressed. This message may contain information that is proprietary, confidential, and attorney-client privileged. If you are not the intended recipient, please immediately notify the sender and delete this message and attachments from any computer, phone, system, or cloud storage. Any viewing, copying, publishing, disclosure, distribution of this information, or the taking of any action in reliance on its contents of this message by unintended recipients is strictly prohibited. ♡ Please consider the environment before printing this email.</div>
+<div class="disclaimer-preview">
+This message, including attachments, is the property of TOJI Co and is intended solely for the individuals or entities to which it is addressed. This message may contain information that is proprietary, confidential, and attorney-client privileged. If you are not the intended recipient, please immediately notify the sender and delete this message and attachments from any computer, phone, system, or cloud storage. Any viewing, copying, publishing, disclosure, distribution of this information, or the taking of any action in reliance on its contents of this message by unintended recipients is strictly prohibited. ♡ Please consider the environment before printing this email.
 </div>
 </div>
 </div>
+</div>
+
 <script>
-let cat='matcha',color='blue';
-const $=id=>document.getElementById(id);
-function update(){
- $('n').textContent=$('name').value;
- $('j').textContent=$('job').value;
- const em=$('email').value;
- $('e').textContent=em;
- $('e').href='mailto:'+em;
- $('f').textContent=$('favorite').value;
- $('circle').className='circle '+cat;
- $('bg').src=color+'.png';
-}
-['name','job','email','favorite'].forEach(x=>$(x).addEventListener('input',update));
-document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{cat=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');update()});
-document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(x=>x.classList.remove('active'));b.classList.add('active');update()});
-$('copy').onclick=async()=>{
- update();
- const base=new URL('.',location.href).href;
- const bg=base+color+'.png';
- const circle=base+'circle.png';
- const esc=v=>String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const name=esc($('name').value),job=esc($('job').value),em=esc($('email').value),fav=esc($('favorite').value).replace(/\n/g,'<br>');
- const circleLeft=cat==='coffee'?85:cat==='tea'?228:374;
- const disclaimer=document.querySelector('.disclaimer').textContent;
- const html='<div style="background:#fff;display:inline-block">'+
- '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="808" height="337" background="'+bg+'" style="border-collapse:collapse;width:808px;height:337px;background:#fff url('+bg+') no-repeat;background-size:808px 337px">'+
- '<tr><td width="558" height="337" valign="top" style="width:558px;height:337px;padding:0;vertical-align:top">'+
- '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="558" style="border-collapse:collapse;width:558px">'+
- '<tr><td height="53"></td></tr>'+
- '<tr><td height="41" style="padding-left:49px;font-family:Courier New,monospace;font-size:34px;line-height:41px;font-weight:700;color:#0d0d0d;white-space:nowrap">'+name+'</td></tr>'+
- '<tr><td height="25"></td></tr>'+
- '<tr><td height="27"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="558"><tr><td width="49"></td><td width="249" style="font-family:Courier New,monospace;font-size:23px;line-height:27px;font-weight:700;color:#0d0d0d;white-space:nowrap">'+job+'</td><td style="font-family:Courier New,monospace;font-size:15px;line-height:27px;white-space:nowrap"><a href="mailto:'+em+'" style="color:#0d0d0d;text-decoration:underline">'+em+'</a></td></tr></table></td></tr>'+
- '<tr><td height="19"></td></tr>'+
- '<tr><td height="43"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="558"><tr><td width="'+circleLeft+'"></td><td width="96"><img src="'+circle+'" width="96" height="43" style="display:block;border:0;width:96px;height:43px" alt=""></td><td></td></tr></table></td></tr>'+
- '<tr><td height="14"></td></tr>'+
- '<tr><td height="46" valign="top" style="padding:0 49px;font-family:Courier New,monospace;font-size:15px;line-height:18px;color:#0d0d0d;vertical-align:top">'+fav+'</td></tr>'+
- '<tr><td height="69"></td></tr></table></td>'+
- '<td width="250" height="337" valign="top" style="width:250px;height:337px;padding:0;vertical-align:top">'+
- '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="250" style="border-collapse:collapse;width:250px">'+
- '<tr><td height="168"></td></tr>'+
- '<tr><td height="32" style="padding:6px 0 0 38px;font-family:Courier New,monospace;font-size:15px;line-height:19px"><a href="tel:+17473723110" style="color:#8a572f;text-decoration:none">(747) 372-3110</a></td></tr>'+
- '<tr><td height="32" style="padding:6px 0 0 38px;font-family:Courier New,monospace;font-size:15px;line-height:19px"><a href="https://cloudcafe.co" style="color:#8a572f;text-decoration:none">cloudcafe.co</a></td></tr>'+
- '<tr><td height="31" style="padding:5px 0 0 38px;font-family:Courier New,monospace;font-size:15px;line-height:19px"><a href="https://www.instagram.com/cloudcafe_official" style="color:#8a572f;text-decoration:none">@cloudcafe_official</a></td></tr>'+
- '<tr><td height="31" style="padding:5px 0 0 38px;font-family:Courier New,monospace;font-size:15px;line-height:19px"><a href="https://www.tiktok.com/@sipcloudcafe" style="color:#8a572f;text-decoration:none">@sipcloudcafe</a></td></tr>'+
- '<tr><td height="43"></td></tr></table></td></tr></table></div>'+
- '<div style="margin-top:9px;width:760px;max-width:760px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.4;color:#9a9a9a;font-style:italic">'+disclaimer+'</div>';
- try{
-  await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([$('name').value+'\n'+$('job').value+'\n'+$('email').value],{type:'text/plain'})})]);
-  $('status').textContent='Copied. Paste directly into Gmail → Settings → Signature.';
- }catch(err){
-  $('status').textContent='Copy blocked. Use Chrome and allow clipboard access.';
- }
+const BG = {
+ blue:"blue.png", coral:"coral.png", cream:"cream.png",
+ matcha:"matcha.png", pink:"pink.png", yellow:"yellow.png"
 };
-update();
+const brown="#8a572f";
+let selected="matcha";
+let color="blue";
+const q=id=>document.getElementById(id);
+const canvas=q("previewCanvas"), ctx=canvas.getContext("2d");
+const bg=new Image(), circle=new Image();
+circle.src="circle.png";
+
+function imageReady(img){return new Promise((res,rej)=>{if(img.complete&&img.naturalWidth) return res(); img.onload=res; img.onerror=rej;});}
+function spacedText(ctx,text,x,y,spacing){
+ let xx=x; for(const ch of text){ctx.fillText(ch,xx,y); xx+=ctx.measureText(ch).width+spacing;}
+}
+function wrapText(ctx,text,x,y,maxWidth,lineH){
+ const words=text.split(/\s+/); let line="";
+ for(const w of words){
+   const test=line?line+" "+w:w;
+   if(ctx.measureText(test).width>maxWidth && line){ctx.fillText(line,x,y); line=w; y+=lineH;}
+   else line=test;
+ }
+ if(line) ctx.fillText(line,x,y);
+}
+async function render(){
+ bg.src=BG[color];
+ await Promise.all([imageReady(bg),imageReady(circle), document.fonts?.ready||Promise.resolve()]);
+ ctx.clearRect(0,0,808,337);
+ ctx.drawImage(bg,0,0,808,337);
+
+ ctx.textBaseline="top";
+ ctx.fillStyle="#0d0d0d";
+ ctx.font='700 34px "JetBrains Mono","Courier New",monospace';
+ spacedText(ctx,q("name").value,49,53,-1.2);
+
+ ctx.font='700 23px "JetBrains Mono","Courier New",monospace';
+ ctx.fillText(q("job").value,49,119);
+
+ ctx.font='400 15px "JetBrains Mono","Courier New",monospace';
+ const email=q("email").value;
+ ctx.fillText(email,298,121);
+ ctx.fillRect(298,138,ctx.measureText(email).width,1);
+
+ ctx.font='400 15px "JetBrains Mono","Courier New",monospace';
+ wrapText(ctx,q("favorite").value,49,222,460,18.3);
+
+ const circleLeft=selected==="coffee"?85:selected==="tea"?228:374;
+ ctx.drawImage(circle,circleLeft,165,96,43);
+
+ ctx.fillStyle=brown;
+ ctx.font='400 15.5px "JetBrains Mono","Courier New",monospace';
+ ctx.fillText("(747) 372-3110",596,174);
+ ctx.fillText("cloudcafe.co",596,206);
+ ctx.fillText("@cloudcafe_official",596,237);
+ ctx.fillText("@sipcloudcafe",596,268);
+}
+["name","job","email","favorite"].forEach(id=>q(id).addEventListener("input",render));
+document.querySelectorAll("[data-cat]").forEach(btn=>btn.addEventListener("click",()=>{
+ selected=btn.dataset.cat;
+ document.querySelectorAll("[data-cat]").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active"); render();
+}));
+document.querySelectorAll("[data-color]").forEach(btn=>btn.addEventListener("click",()=>{
+ color=btn.dataset.color;
+ document.querySelectorAll("[data-color]").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active"); render();
+}));
+
+q("downloadBtn").addEventListener("click",async()=>{
+ await render();
+ const a=document.createElement("a");
+ a.href=canvas.toDataURL("image/png");
+ a.download=(q("name").value||"cloud-cafe").toLowerCase().replace(/[^a-z0-9]+/g,"-")+"-signature.png";
+ a.click();
+ q("status").textContent="PNG downloaded. Upload it directly in Gmail’s signature editor.";
+});
+
+q("copyLinksBtn").addEventListener("click",async()=>{
+ const disclaimer=`This message, including attachments, is the property of TOJI Co and is intended solely for the individuals or entities to which it is addressed. This message may contain information that is proprietary, confidential, and attorney-client privileged. If you are not the intended recipient, please immediately notify the sender and delete this message and attachments from any computer, phone, system, or cloud storage. Any viewing, copying, publishing, disclosure, distribution of this information, or the taking of any action in reliance on its contents of this message by unintended recipients is strictly prohibited. ♡ Please consider the environment before printing this email.`;
+ const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;color:${brown};">
+ <a href="tel:+17473723110" style="color:${brown};text-decoration:underline">(747) 372-3110</a> &nbsp;•&nbsp;
+ <a href="https://cloudcafe.co" style="color:${brown};text-decoration:underline">cloudcafe.co</a> &nbsp;•&nbsp;
+ <a href="https://www.instagram.com/cloudcafe_official" style="color:${brown};text-decoration:underline">@cloudcafe_official</a> &nbsp;•&nbsp;
+ <a href="https://www.tiktok.com/@sipcloudcafe" style="color:${brown};text-decoration:underline">@sipcloudcafe</a>
+ </div>
+ <div style="margin-top:14px;max-width:760px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.45;color:#9a9a9a;font-style:italic">${disclaimer}</div>`;
+ try{
+   await navigator.clipboard.write([new ClipboardItem({
+    "text/html":new Blob([html],{type:"text/html"}),
+    "text/plain":new Blob([`(747) 372-3110 • cloudcafe.co • @cloudcafe_official • @sipcloudcafe\n\n${disclaimer}`],{type:"text/plain"})
+   })]);
+   q("status").textContent="Links + disclaimer copied. Paste them underneath the uploaded PNG in Gmail.";
+ }catch(e){q("status").textContent="Clipboard blocked. Open in Chrome and allow clipboard access.";}
+});
+render();
 </script>
 </body>
 </html>
