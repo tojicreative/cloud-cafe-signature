@@ -117,7 +117,9 @@ function wrapText(ctx,text,x,y,maxWidth,lineH){
 async function render(){
  bg.src=BG[color];
  await Promise.all([imageReady(bg),imageReady(circle), document.fonts?.ready||Promise.resolve()]);
- ctx.clearRect(0,0,808,337);\n ctx.fillStyle="#ffffff";\n ctx.fillRect(0,0,808,337);
+ ctx.clearRect(0,0,808,337);
+ ctx.fillStyle="#ffffff";
+ ctx.fillRect(0,0,808,337);
  ctx.drawImage(bg,0,0,808,337);
 
  ctx.textBaseline="top";
